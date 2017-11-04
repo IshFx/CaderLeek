@@ -1,0 +1,179 @@
+// Check if the target is in the range of our weapon
+// @param target the leek to test
+// @return bool
+function isInRange(target) {
+	if (target === null) return false;
+
+	return isInRangeFrom(target, getCell());
+}
+
+// Check if we are in the range of the enemy from a cell
+// @param enemy the enemy to test range
+// @param fromCell the cell to test
+// @return bool
+function isInRangeFrom(enemy, fromCell) {
+	if (enemy === null) return false;
+
+	var start = fromCell;
+	var end = getCell(enemy);
+
+	var distance = getCellDistance(start, end);
+	if (distance <= getWeaponMaxRange(getWeapon())) {
+		return true;
+	}
+
+	return false;
+}
+
+// Check if we are in the range of the enemy
+// @param enemy the enemy to test
+// @return bool
+function isInRangeOf(enemy) {
+	if (enemy === null) return false;
+
+	return isInRangeOfFrom(enemy, getCell());
+}
+
+// Check if we are in the range of the enemy from the cell
+// @param enemy the enemy to test range of
+// @param fromCell the cell to test
+// @return bool
+function isInRangeOfFrom(enemy, fromCell) {
+	if (enemy === null) return false;
+
+	var start = fromCell;
+	var end = getCell(enemy);
+
+	var distance = getCellDistance(start, end);
+	if (distance <= getWeaponMaxRange(getWeapon(enemy))) {
+		return true;
+	}
+
+	return false;
+}
+
+// Check if the enemy is in range and has line of sight on him
+// @param enemy the enemy to test
+// @return bool
+function isInSightAndRange(enemy) {
+	if (enemy === null) return false;
+
+	return isInRange(enemy) && hasSightOn(enemy);
+}
+
+// Check if the enemy is in our range from the cell
+// @param enemy the enemy to test
+// @param fromCell the cell to test
+// @return bool
+function isInSightAndRangeFrom(enemy, fromCell) {
+	if (enemy === null) return false;
+
+	return isInRangeFrom(enemy, fromCell) && hasSightOnFrom(enemy, fromCell);
+}
+
+// Check if we are in the range and line of sight of the enemy from the cell
+// @param enemy the enemy to test
+// @return bool
+function isInSightAndRangeOf(enemy) {
+	if (enemy === null) return false;
+
+	return isInRangeOf(enemy) && hasSightOn(enemy);
+}
+
+// Get a circle area of cell
+// @param centerlCell the center cell of the area
+// @param radius size of the area
+// @return bool
+function getCellArea(centerCell, radius) {
+	var cellX = getCellX(centerCell);
+	var cellY = getCellY(centerCell);
+	var cells = [];
+
+	radius = max(0, min(getMP(), radius));
+
+	for (var x = cellX - radius; x <= cellX + radius; x++) {
+		for (var y = cellY - radius; y <= cellY + radius; y++) {
+
+			var cell = getCellFromXY(x, y);
+			if (cell !== null) {
+
+				if (getCellDistance(cell, centerCell) <= radius) {
+					push(cells, cell);
+				}
+			}
+		}
+	}
+
+	mark(cells, COLOR_RED, 1);
+	return cells;
+}
+
+// Check if we are in the range and line of sight of the enemy from the cell
+// @param enemy the enemy to test
+// @param fromCell the cell to test
+// @return bool
+function isInSightAndRangeOfFrom(enemy, fromCell) {
+	if (enemy === null) return false;
+
+	return isInRangeOfFrom(enemy, fromCell) && hasSightOnFrom(enemy, fromCell);
+}
+
+// Check if we have a line of sight on the enemy
+// @param enemy the enemy to test
+// @return bool
+function hasSightOn(enemy) {
+	if (enemy === null) return false;
+
+	return hasSightOnFrom(enemy, getCell());
+}
+
+// Check if we have a line of sight on the enemy from the cell
+// @param enemy the enemy to test
+// @param fromCell the cell to test
+// @return bool
+function hasSightOnFrom(enemy, fromCell) {
+	if (enemy === null) return false;
+
+	var start = fromCell;
+	var end = getCell(enemy);
+
+	return lineOfSight(start, end);
+}
+
+// Check if we can move
+// @return bool
+function canMove() {
+	return getMP() > 0;
+}
+
+// Get the best weapon usable on the target
+// @return weapon
+function getBestWeaponToUseOn(target) {
+	var weapons = getWeapons();
+	var bestWeapon;
+	var bestDamages = 0;
+
+	for (var weapon in weapons) {
+
+		if (canUseWeapon(weapon, target)) {
+
+			var effects = getWeaponEffects(weapon);
+			var cost = getWeaponCost(weapon);
+
+			for (var effect in effects) {
+
+				if (effect[0] == EFFECT_DAMAGE) {
+
+					var averageDamages = ((effect[1] + effect[2]) * 0.5) * (floor(getTotalMP() / cost));
+					if (averageDamages > bestDamages) {
+
+						bestWeapon = weapon;
+						bestDamages = averageDamages;
+					}
+				}
+			}
+		}
+	}
+
+	return bestWeapon;
+}
