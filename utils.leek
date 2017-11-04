@@ -104,7 +104,6 @@ function getCellArea(centerCell, radius) {
 		}
 	}
 
-	mark(cells, COLOR_RED, 1);
 	return cells;
 }
 
@@ -176,4 +175,52 @@ function getBestWeaponToUseOn(target) {
 	}
 
 	return bestWeapon;
+}
+
+// Get the safest cell where you can move to
+// @return cell
+function getSafestCell() {
+	var cellsAround = getCellArea(getCell(), getMP());
+	var cellsToTest = [];
+
+	for (var cell in cellsAround) {
+
+		if (getCellContent(cell) == CELL_EMPTY && getPathLength(getCell(), cell) <= getMP()) {
+
+			push(cellsToTest, cell);
+		}
+	}
+
+	mark(cellsToTest, COLOR_RED);
+
+	var enemies = getEnemies();
+	var bestCell = getCell();
+	var bestCellVulnerabilityCount = count(enemies);
+	var bestCellDistanceAverage = 0;
+
+	for (var cell in cellsToTest) {
+
+		var cellVulnerabilityCount = 0;
+		var cellDistanceAverage = 0;
+		for (var enemy in enemies) {
+
+			if (isInSightAndRangeOfFrom(enemy, cell)) {
+				cellVulnerabilityCount++;
+				cellDistanceAverage += getCellDistance(getCell(enemy), cell);
+			}
+		}
+
+		cellDistanceAverage /= count(enemies);
+
+		if (cellVulnerabilityCount < bestCellVulnerabilityCount ||
+			(cellVulnerabilityCount >= bestCellVulnerabilityCount &&
+			cellDistanceAverage > bestCellDistanceAverage)) {
+
+			bestCell = cell;
+			bestCellVulnerabilityCount = cellVulnerabilityCount;
+			bestCellDistanceAverage = cellDistanceAverage;
+		}
+	}
+
+	debug("Best cell to cover " + bestCell + " with " + bestCellVulnerabilityCount + " vulnerabilities");
 }
