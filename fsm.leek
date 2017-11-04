@@ -1,0 +1,45 @@
+// Finite State Machine 'API'
+// Author: Arth
+
+// Create a FSM object
+// @return FSM object
+function FSM_create() {
+	var FSM = [];
+	FSM["lastState"] = null;
+	FSM["start"] = null;
+
+	return FSM;
+}
+
+// Set starting state
+// @param [in/out]  FSM    FSM object used
+// @param [in]      start
+function FSM_setStart(@FSM, start) {
+	FSM["start"] = start;
+}
+
+// Get last state
+// @param [in/out] FSM FSM object used
+// @return the last executed state
+function FSM_getLast(@fsm) {
+	return fsm["lastState"];
+}
+
+// Run a finite state machine
+// @param [in/out]  FSM   FSM object used
+function FSM_runAt(@FSM, @context, start) {
+	FSM["finish"] = false;
+	var next = start;
+
+	while (!FSM["finish"] && next != null) {
+		next = next(FSM, context);
+		FSM["lastState"] = next;
+	}
+}
+
+// Run a finite state machine
+// @param [in/out]  FSM   FSM object used
+function FSM_run(@FSM, @context) {
+	var start = FSM["start"];
+	FSM_runAt(FSM, context, start);
+}
