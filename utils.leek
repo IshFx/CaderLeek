@@ -83,7 +83,7 @@ function isInSightAndRangeOf(enemy) {
 // Get a circle area of cell
 // @param centerlCell the center cell of the area
 // @param radius size of the area
-// @return bool
+// @return array[cell]
 function getCellArea(centerCell, radius) {
 	var cellX = getCellX(centerCell);
 	var cellY = getCellY(centerCell);
