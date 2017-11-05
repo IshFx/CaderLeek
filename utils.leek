@@ -89,7 +89,7 @@ function getCellArea(centerCell, radius) {
 	var cellY = getCellY(centerCell);
 	var cells = [];
 
-	radius = max(0, min(getMP(), radius));
+	radius = max(0, radius);
 
 	for (var x = cellX - radius; x <= cellX + radius; x++) {
 		for (var y = cellY - radius; y <= cellY + radius; y++) {
