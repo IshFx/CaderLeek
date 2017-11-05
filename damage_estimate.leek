@@ -1,0 +1,72 @@
+/// Damages estimation module
+///@autor Arth
+
+/// Statistical estimate damage of a weapon/chip effect from an entity to a target
+///@param  entity  Shooter entity
+///@param  target  Target entity
+///@param  weapon  Shooter weapon
+///@return {min, max, mean, stddev}
+function estimate_damage_effects (entity, target, @effects) {
+	var strength = getStrength(entity);
+	var relative_shield = getRelativeShield(target);
+	var absolute_shield = getAbsoluteShield(target);
+	
+	var damage = [];
+	damage["min"]    = 0; //< Minimum damage
+	damage["min"]    = 0; //< Maximum damage
+	damage["mean"]   = 0; //< Mean damage
+	damage["stddev"] = 0; //< Standard deviation of damage (as variance temporarily)
+	
+	for(var effect in effects) {
+		if(effect[0] === EFFECT_DAMAGE) {
+			var damage_min = effect[1] * (1+strength/100);
+			var damage_max = effect[2] * (1+strength/100);
+			damage["min"]    += damage_min*(1-relative_shield/100) - absolute_shield;
+			damage["max"]    += damage_max*(1-relative_shield/100) - absolute_shield;
+			damage["mean"]   +=     (damage["max"] + damage["min"]) / 2;
+			damage["stddev"] += (pow(damage["max"] - damage["min"]+1, 2) - 1)/12;
+		}
+		else ; // unknow effect (not implemented)
+	}
+	damage["stddev"] = sqrt(damage["stddev"]); // Variance to sandard deviation
+	
+	return damage;
+}
+
+/// Statistical estimate maximum damage of a weapon from an entity to a target
+///@param  entity  Shooter entity
+///@param  target  Target entity
+///@param  weapon  Shooter weapon
+///@param  tp      Shooter TurnPoint
+///@return {min, max, mean, stddev}
+function estimate_damage_weapon (entity, target, weapon, tp) {
+	var effects = getWeaponEffects(weapon);
+	var damage = estimate_damage_effects(entity, target, effects);
+	
+	var hits = floor( tp / getWeaponCost(weapon) );
+	damage["min"]    *= hits;
+	damage["max"]    *= hits;
+	damage["mean"]   *= hits;
+	damage["stddev"] *= sqrt(hits);
+	
+	return damage;
+}
+
+/// Statistical estimate maximum damage of a chip from an entity to a target
+///@param  entity  Shooter entity
+///@param  target  Target entity
+///@param  chip    Shooter chip
+///@param  tp      Shooter TurnPoint
+///@return {min, max, mean, stddev}
+function estimate_damage_chip (entity, target, chip, tp) {
+	var effects = getChipEffects(chip);
+	var damage = estimate_damage_effects(entity, target, effects);
+	
+	var hits = floor( tp / getChipCost(chip) );
+	damage["min"]    = damage["min"]    * hits;
+	damage["max"]    = damage["max"]    * hits;
+	damage["mean"]   = damage["mean"]   * hits;
+	damage["stddev"] = damage["stddev"] * sqrt(hits);
+	
+	return damage;
+}
