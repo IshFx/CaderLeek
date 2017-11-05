@@ -163,7 +163,7 @@ function getBestWeaponToUseOn(target) {
 
 				if (effect[0] == EFFECT_DAMAGE) {
 
-					var averageDamages = ((effect[1] + effect[2]) * 0.5) * (floor(getTotalMP() / cost));
+					var averageDamages = ((effect[1] + effect[2]) * 0.5) * (floor(getTotalTP() / cost));
 					if (averageDamages > bestDamages) {
 
 						bestWeapon = weapon;
