@@ -19,8 +19,8 @@ function estimate_damage_effects (entity, target, @effects) {
 	
 	for(var effect in effects) {
 		if(effect[0] === EFFECT_DAMAGE) {
-			var damage_min = effect[1] * (1+strength/100);
-			var damage_max = effect[2] * (1+strength/100);
+			var damage_min = (effect[1] * (1+strength/100)) * (1 + 0.4*getCriticalHitChance()/100) ;
+			var damage_max = (effect[2] * (1+strength/100)) * (1 + 0.4*getCriticalHitChance()/100);
 			damage["min"]    += damage_min*(1-relative_shield/100) - absolute_shield;
 			damage["max"]    += damage_max*(1-relative_shield/100) - absolute_shield;
 			damage["mean"]   +=     (damage["max"] + damage["min"]) / 2;
@@ -69,4 +69,11 @@ function estimate_damage_chip (entity, target, chip, tp) {
 	damage["stddev"] = damage["stddev"] * sqrt(hits);
 	
 	return damage;
+}
+
+/// Gets the critical hit percentage of current leak
+///@return critical hit percentage 
+function getCriticalHitChance() {
+	var criticalHit = getAgility() / 10;
+	return (criticalHit > 100) ? 100 : criticalHit;
 }
