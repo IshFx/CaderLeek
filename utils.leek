@@ -185,7 +185,9 @@ function getSafestCell() {
 
 	for (var cell in cellsAround) {
 
-		if (getCellContent(cell) == CELL_EMPTY && getPathLength(getCell(), cell) <= getMP()) {
+		if (getCellContent(cell) == CELL_EMPTY && 
+			getPathLength(leekCell, cell) != null && 
+			getPathLength(getCell(), cell) <= getMP()) {
 
 			push(cellsToTest, cell);
 		}
